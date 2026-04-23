@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker & Pomodoro</title>
+    <style>
+        /* Portfolio Color Palette */
+        :root {
+            --bg-cream: #faeccb;
+            --primary-blue: #467cb5;
+            --dark-blue: #2c4e73;
+            --white: #ffffff;
+            --text-dark: #333333;
+            --danger-red: #d9534f;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard {
+            background: var(--white);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header */
+        .header {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header h2 { margin: 0; }
+
+        /* Pomodoro Timer Section */
+        .timer-section {
+            text-align: center;
+            padding: 30px 20px;
+            border-bottom: 2px solid var(--bg-cream);
+        }
+
+        #timer-display {
+            font-size: 60px;
+            font-weight: bold;
+            color: var(--dark-blue);
+            margin: 10px 0;
+            font-family: monospace;
+        }
+
+        .timer-controls button {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .timer-controls button:hover { background-color: var(--dark-blue); }
+        .timer-controls button.reset { background-color: var(--text-dark); }
+
+        /* Task List Section */
+        .task-section {
+            padding: 20px;
+            background-color: #fcfcfc;
+        }
+
+        .task-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #task-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #task-input:focus { border-color: var(--primary-blue); }
+
+        #add-task-btn {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background: var(--white);
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        li.completed span {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-red);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header">
+            <h2>Focus & Study Tracker</h2>
+        </div>
+
+        <div class="timer-section">
+            <h3 style="margin-top: 0; color: #666;">Pomodoro Timer (25 Min)</h3>
+            <div id="timer-display">25:00</div>
+            <div class="timer-controls">
+                <button onclick="startTimer()">Start</button>
+                <button onclick="pauseTimer()">Pause</button>
+                <button class="reset" onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
+
+        <div class="task-section">
+            <h3 style="margin-top: 0; color: #666;">Syllabus Checklist</h3>
+            <div class="task-input-area">
+                <input type="text" id="task-input" placeholder="e.g., Revise Java Unit III: Multithreading...">
+                <button id="add-task-btn" onclick="addTask()">Add</button>
+            </div>
+            <ul id="task-list">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- POMODORO TIMER LOGIC ---
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let timerId = null;
+        let isRunning = false;
+
+        const display = document.getElementById('timer-display');
+
+        function updateDisplay() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            // Add leading zero if less than 10
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            display.innerText = `${minutes}:${seconds}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timerId = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timerId);
+                        isRunning = false;
+                        alert("Pomodoro complete! Take a 5 minute break.");
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(timerId);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            isRunning = false;
+            timeLeft = 25 * 60;
+            updateDisplay();
+        }
+
+        // --- LOCAL STORAGE TASK LOGIC ---
+        let tasks = JSON.parse(localStorage.getItem('studyTasks')) || [];
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = ''; // Clear current list
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                if (task.completed) {
+                    li.classList.add('completed');
+                }
+
+                li.innerHTML = `
+                    <span style="cursor:pointer;" onclick="toggleTask(${index})">${task.text}</span>
+                    <button class="delete-btn" onclick="deleteTask(${index})">X</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const input = document.getElementById('task-input');
+            const text = input.value.trim();
+
+            if (text !== '') {
+                tasks.push({ text: text, completed: false });
+                localStorage.setItem('studyTasks', JSON.stringify(tasks));
+                input.value = '';
+                renderTasks();
+            }
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem('studyTasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('studyTasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        // Allow pressing 'Enter' to add a task
+        document.getElementById('task-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Initialize App on load
+        updateDisplay();
+        renderTasks();
+    </script>
+
+</body>
+</html>
